@@ -14,7 +14,7 @@ from tensorflow.keras.applications.efficientnet import (
 )
 
 # ============================================
-# CONFIG
+# PAGE CONFIG
 # ============================================
 st.set_page_config(
     page_title="Klasifikasi Penyakit Daun Tomat",
@@ -25,16 +25,16 @@ st.set_page_config(
 # CLASS NAMES
 # ============================================
 CLASS_NAMES = [
-    'Bacterial Spot',
-    'Early Blight',
-    'Late Blight',
-    'Leaf Mold',
-    'Septoria Leaf Spot',
-    'Spider Mites',
-    'Target Spot',
-    'Tomato Mosaic Virus',
-    'Tomato Yellow Leaf Curl Virus',
-    'Healthy'
+    "Bacterial Spot",
+    "Early Blight",
+    "Late Blight",
+    "Leaf Mold",
+    "Septoria Leaf Spot",
+    "Spider Mites",
+    "Target Spot",
+    "Tomato Mosaic Virus",
+    "Tomato Yellow Leaf Curl Virus",
+    "Healthy"
 ]
 
 # ============================================
@@ -48,8 +48,7 @@ CONF_THRESHOLDS = {
 }
 
 # ============================================
-# GOOGLE DRIVE MODEL CONFIG
-# GANTI FILE_ID SESUAI MODEL ANDA
+# MODEL CONFIG
 # ============================================
 MODEL_URLS = {
 
@@ -111,37 +110,67 @@ MODEL_URLS = {
 # ============================================
 def download_model(file_id, output_path):
 
-    if not os.path.exists(output_path):
+    try:
 
-        url = f"https://drive.google.com/uc?id={file_id}"
+        if not os.path.exists(output_path):
 
-        with st.spinner(f"Downloading {output_path} ..."):
+            url = f"https://drive.google.com/uc?id={file_id}"
 
-            gdown.download(
-                url,
-                output_path,
-                quiet=False
-            )
+            with st.spinner(f"Downloading {output_path} ..."):
+
+                gdown.download(
+                    url,
+                    output_path,
+                    quiet=False,
+                    fuzzy=True
+                )
+
+            if not os.path.exists(output_path):
+
+                raise Exception(
+                    f"Failed to download {output_path}"
+                )
+
+    except Exception as e:
+
+        st.error(f"Download error: {str(e)}")
+        raise e
 
 # ============================================
-# LOAD SINGLE MODEL
+# LOAD MODEL
 # ============================================
 @st.cache_resource
 def load_single_model(model_name, variant):
 
-    info = MODEL_URLS[variant][model_name]
+    try:
 
-    download_model(
-        info["file_id"],
-        info["path"]
-    )
+        info = MODEL_URLS[variant][model_name]
 
-    model = tf.keras.models.load_model(
-        info["path"],
-        compile=False
-    )
+        # DOWNLOAD MODEL
+        download_model(
+            info["file_id"],
+            info["path"]
+        )
 
-    return model
+        # VALIDASI FILE
+        if not os.path.exists(info["path"]):
+
+            raise Exception(
+                f"Model file not found: {info['path']}"
+            )
+
+        # LOAD MODEL
+        model = tf.keras.models.load_model(
+            info["path"],
+            compile=False
+        )
+
+        return model
+
+    except Exception as e:
+
+        st.error(f"Model load error: {str(e)}")
+        raise e
 
 # ============================================
 # PREPROCESSING
@@ -199,20 +228,17 @@ with st.expander("🟤 Bacterial Spot"):
 
 with st.expander("🟠 Early Blight"):
     st.write(
-        "Ditandai bercak melingkar seperti cincin "
-        "target pada daun."
+        "Ditandai bercak melingkar seperti cincin target pada daun."
     )
 
 with st.expander("⚫ Late Blight"):
     st.write(
-        "Penyakit dengan bercak gelap basah "
-        "yang cepat menyebar."
+        "Penyakit dengan bercak gelap basah yang cepat menyebar."
     )
 
 with st.expander("🟢 Leaf Mold"):
     st.write(
-        "Menyebabkan bercak kekuningan "
-        "dan pertumbuhan jamur."
+        "Menyebabkan bercak kekuningan dan pertumbuhan jamur."
     )
 
 with st.expander("🟡 Septoria Leaf Spot"):
@@ -237,8 +263,7 @@ with st.expander("🦠 Tomato Mosaic Virus"):
 
 with st.expander("🌿 Tomato Yellow Leaf Curl Virus"):
     st.write(
-        "Virus yang menyebabkan daun menguning "
-        "dan melengkung."
+        "Virus yang menyebabkan daun menguning dan melengkung."
     )
 
 with st.expander("✅ Healthy"):
@@ -250,7 +275,7 @@ with st.expander("✅ Healthy"):
 # MODEL SELECTOR
 # ============================================
 variant = st.selectbox(
-    "Pilih skenario model",
+    "Pilih Skenario Model",
     ["FF", "FT10", "FT20", "FT30"]
 )
 
@@ -258,7 +283,7 @@ variant = st.selectbox(
 # FILE UPLOADER
 # ============================================
 uploaded_file = st.file_uploader(
-    "Upload gambar daun tomat",
+    "Upload Gambar Daun Tomat",
     type=["jpg", "jpeg", "png"]
 )
 
@@ -267,139 +292,152 @@ uploaded_file = st.file_uploader(
 # ============================================
 if uploaded_file is not None:
 
-    image = Image.open(uploaded_file)
+    try:
 
-    st.subheader("Gambar Input")
+        image = Image.open(uploaded_file)
 
-    col_l, col_c, col_r = st.columns([1, 2, 1])
+        st.subheader("Gambar Input")
 
-    with col_c:
-        st.image(
-            image,
-            use_container_width=True
-        )
+        col_l, col_c, col_r = st.columns([1, 2, 1])
 
-    # ============================================
-    # PREPROCESS
-    # ============================================
-    x_mn = preprocess_mobilenet(image)
-    x_ef = preprocess_efficientnet(image)
+        with col_c:
 
-    # ============================================
-    # LOAD MODEL
-    # ============================================
-    model_mn = load_single_model(
-        "MobileNetV2",
-        variant
-    )
-
-    model_ef = load_single_model(
-        "EfficientNetB0",
-        variant
-    )
-
-    # ============================================
-    # PREDICTION
-    # ============================================
-    pred_mn = model_mn.predict(
-        x_mn,
-        verbose=0
-    )[0]
-
-    pred_ef = model_ef.predict(
-        x_ef,
-        verbose=0
-    )[0]
-
-    # ============================================
-    # CONFIDENCE
-    # ============================================
-    conf_mn = float(np.max(pred_mn))
-    conf_ef = float(np.max(pred_ef))
-
-    idx_mn = int(np.argmax(pred_mn))
-    idx_ef = int(np.argmax(pred_ef))
-
-    threshold = CONF_THRESHOLDS[variant]
-
-    # ============================================
-    # CONFIDENCE GATE
-    # ============================================
-    if conf_mn < threshold or conf_ef < threshold:
+            st.image(
+                image,
+                use_container_width=True
+            )
 
         st.markdown("---")
 
-        st.markdown(
-            """
-            <h4 style='text-align:center; color:red;'>
-            Silakan upload ulang gambar daun tomat
-            </h4>
-            """,
-            unsafe_allow_html=True
-        )
-
-        st.caption(
-            "Gambar mungkin bukan daun tomat "
-            "atau kualitas gambar kurang baik."
-        )
-
-    else:
-
-        st.markdown("---")
-
-        st.subheader(
-            f"Hasil Prediksi ({variant})"
-        )
-
-        col1, col2 = st.columns(2)
+        # ============================================
+        # PREPROCESS
+        # ============================================
+        x_mn = preprocess_mobilenet(image)
+        x_ef = preprocess_efficientnet(image)
 
         # ============================================
-        # MOBILENETV2
+        # LOAD MODEL
         # ============================================
-        with col1:
+        with st.spinner("Loading MobileNetV2 ..."):
 
-            st.markdown("### MobileNetV2")
-
-            st.write(
-                f"**Prediksi:** "
-                f"{CLASS_NAMES[idx_mn]}"
+            model_mn = load_single_model(
+                "MobileNetV2",
+                variant
             )
 
-            st.write(
-                f"**Confidence:** "
-                f"{conf_mn*100:.2f}%"
-            )
+        with st.spinner("Loading EfficientNetB0 ..."):
 
-            st.bar_chart(
-                {
-                    CLASS_NAMES[i]: float(pred_mn[i])
-                    for i in range(len(CLASS_NAMES))
-                }
+            model_ef = load_single_model(
+                "EfficientNetB0",
+                variant
             )
 
         # ============================================
-        # EFFICIENTNETB0
+        # PREDICT
         # ============================================
-        with col2:
+        pred_mn = model_mn.predict(
+            x_mn,
+            verbose=0
+        )[0]
 
-            st.markdown("### EfficientNetB0")
+        pred_ef = model_ef.predict(
+            x_ef,
+            verbose=0
+        )[0]
 
-            st.write(
-                f"**Prediksi:** "
-                f"{CLASS_NAMES[idx_ef]}"
+        # ============================================
+        # CONFIDENCE
+        # ============================================
+        conf_mn = float(np.max(pred_mn))
+        conf_ef = float(np.max(pred_ef))
+
+        idx_mn = int(np.argmax(pred_mn))
+        idx_ef = int(np.argmax(pred_ef))
+
+        threshold = CONF_THRESHOLDS[variant]
+
+        # ============================================
+        # CONFIDENCE GATE
+        # ============================================
+        if conf_mn < threshold or conf_ef < threshold:
+
+            st.markdown("---")
+
+            st.markdown(
+                """
+                <h4 style='text-align:center; color:red;'>
+                Silakan upload ulang gambar daun tomat
+                </h4>
+                """,
+                unsafe_allow_html=True
             )
 
-            st.write(
-                f"**Confidence:** "
-                f"{conf_ef*100:.2f}%"
+            st.caption(
+                "Gambar mungkin bukan daun tomat "
+                "atau kualitas gambar kurang baik."
             )
 
-            st.bar_chart(
-                {
-                    CLASS_NAMES[i]: float(pred_ef[i])
-                    for i in range(len(CLASS_NAMES))
-                }
+        else:
+
+            st.markdown("---")
+
+            st.subheader(
+                f"Hasil Prediksi ({variant})"
             )
+
+            col1, col2 = st.columns(2)
+
+            # ============================================
+            # MOBILENETV2
+            # ============================================
+            with col1:
+
+                st.markdown("### MobileNetV2")
+
+                st.write(
+                    f"**Prediksi:** "
+                    f"{CLASS_NAMES[idx_mn]}"
+                )
+
+                st.write(
+                    f"**Confidence:** "
+                    f"{conf_mn*100:.2f}%"
+                )
+
+                st.bar_chart(
+                    {
+                        CLASS_NAMES[i]: float(pred_mn[i])
+                        for i in range(len(CLASS_NAMES))
+                    }
+                )
+
+            # ============================================
+            # EFFICIENTNETB0
+            # ============================================
+            with col2:
+
+                st.markdown("### EfficientNetB0")
+
+                st.write(
+                    f"**Prediksi:** "
+                    f"{CLASS_NAMES[idx_ef]}"
+                )
+
+                st.write(
+                    f"**Confidence:** "
+                    f"{conf_ef*100:.2f}%"
+                )
+
+                st.bar_chart(
+                    {
+                        CLASS_NAMES[i]: float(pred_ef[i])
+                        for i in range(len(CLASS_NAMES))
+                    }
+                )
+
+    except Exception as e:
+
+        st.exception(e)
 
 # ============================================
 # FOOTER
