@@ -23,7 +23,7 @@ from tensorflow.keras.applications.efficientnet import (
 st.set_page_config(
     page_title="AI Tomato Disease Detection",
     page_icon="🍅",
-    layout="wide",
+    layout="centered",
     initial_sidebar_state="expanded"
 )
 
@@ -53,11 +53,15 @@ BACKGROUND
 }
 
 /* =====================================================
-MAIN CONTAINER
+PORTRAIT LAYOUT
 ===================================================== */
 .block-container {
-    max-width: 1350px;
+
+    max-width: 780px;
+
     padding-top: 1.5rem;
+
+    padding-bottom: 2rem;
 }
 
 /* =====================================================
@@ -79,13 +83,15 @@ TITLE
 ===================================================== */
 .main-title {
 
-    font-size: 58px;
+    font-size: 48px;
 
     font-weight: 800;
 
     line-height: 1.1;
 
     margin-bottom: 10px;
+
+    text-align: center;
 }
 
 .gradient-text {
@@ -105,9 +111,11 @@ TITLE
 
     color: #9ca3af;
 
-    font-size: 18px;
+    font-size: 17px;
 
     margin-top: 10px;
+
+    text-align: center;
 }
 
 /* =====================================================
@@ -123,7 +131,7 @@ GLASS CARD
 
     border-radius: 24px;
 
-    padding: 25px;
+    padding: 24px;
 
     margin-bottom: 20px;
 
@@ -141,11 +149,11 @@ METRIC CARD
         rgba(255,255,255,0.03)
     );
 
-    border-radius: 22px;
+    border-radius: 20px;
 
     border: 1px solid rgba(255,255,255,0.08);
 
-    padding: 24px;
+    padding: 20px;
 
     text-align: center;
 }
@@ -159,7 +167,7 @@ METRIC CARD
 
 .metric-value {
 
-    font-size: 28px;
+    font-size: 26px;
 
     font-weight: 700;
 
@@ -214,7 +222,7 @@ PREDICTION CARD
 
     border: 1px solid rgba(255,255,255,0.08);
 
-    border-radius: 22px;
+    border-radius: 20px;
 
     padding: 22px;
 
@@ -230,8 +238,6 @@ PREVIEW IMAGE
 
     justify-content: center;
 
-    align-items: center;
-
     margin-top: 10px;
 }
 
@@ -241,11 +247,9 @@ PREVIEW IMAGE
 
     border: 1px solid rgba(255,255,255,0.08);
 
+    max-width: 240px !important;
+
     box-shadow: 0 8px 20px rgba(0,0,0,0.18);
-
-    max-width: 280px !important;
-
-    height: auto;
 }
 
 /* =====================================================
@@ -279,7 +283,7 @@ MOBILE
 @media(max-width:768px){
 
     .main-title{
-        font-size:38px;
+        font-size:34px;
     }
 
     .subtitle{
@@ -287,7 +291,7 @@ MOBILE
     }
 
     .preview-image img{
-        max-width:220px !important;
+        max-width:200px !important;
     }
 
 }
@@ -476,14 +480,6 @@ with st.sidebar:
         "TensorFlow"
     )
 
-    st.markdown("---")
-
-    st.markdown("""
-    ### 🧠 Model
-    - MobileNetV2
-    - EfficientNetB0
-    """)
-
 # =====================================================
 # HERO SECTION
 # =====================================================
@@ -507,7 +503,7 @@ Transfer Learning MobileNetV2 dan EfficientNetB0.
 # =====================================================
 # METRIC CARD
 # =====================================================
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(2)
 
 with col1:
 
@@ -520,15 +516,6 @@ with col1:
 
 with col2:
 
-    st.markdown("""
-    <div class='metric-card'>
-        <div class='metric-title'>Models</div>
-        <div class='metric-value'>2</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col3:
-
     st.markdown(f"""
     <div class='metric-card'>
         <div class='metric-title'>Scenario</div>
@@ -536,11 +523,11 @@ with col3:
     </div>
     """, unsafe_allow_html=True)
 
+st.write("")
+
 # =====================================================
 # UPLOAD SECTION
 # =====================================================
-st.write("")
-
 st.markdown("""
 <div class='glass-card'>
 <h3>📤 Upload Gambar Daun Tomat</h3>
@@ -562,33 +549,29 @@ if uploaded_file is not None:
 
     image = Image.open(uploaded_file)
 
-    col1, col2 = st.columns([0.9,1.1])
-
     # =================================================
     # IMAGE PREVIEW
     # =================================================
-    with col1:
+    st.markdown("""
+    <div class='glass-card'>
+    <h3>🖼 Preview Gambar</h3>
+    </div>
+    """, unsafe_allow_html=True)
 
-        st.markdown("""
-        <div class='glass-card'>
-        <h3>🖼 Preview Gambar</h3>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown(
+        "<div class='preview-image'>",
+        unsafe_allow_html=True
+    )
 
-        st.markdown(
-            "<div class='preview-image'>",
-            unsafe_allow_html=True
-        )
+    st.image(
+        image,
+        width=240
+    )
 
-        st.image(
-            image,
-            width=280
-        )
-
-        st.markdown(
-            "</div>",
-            unsafe_allow_html=True
-        )
+    st.markdown(
+        "</div>",
+        unsafe_allow_html=True
+    )
 
     # =================================================
     # PREPROCESS
@@ -635,67 +618,67 @@ if uploaded_file is not None:
     # =================================================
     # RESULT
     # =================================================
-    with col2:
+    st.write("")
 
-        st.markdown("""
-        <div class='glass-card'>
-        <h3>🤖 Hasil Prediksi AI</h3>
+    st.markdown("""
+    <div class='glass-card'>
+    <h3>🤖 Hasil Prediksi AI</h3>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if conf_mn < threshold or conf_ef < threshold:
+
+        st.error(
+            "Silakan upload ulang gambar daun tomat."
+        )
+
+        st.caption(
+            "Gambar mungkin bukan daun tomat atau kualitas kurang baik."
+        )
+
+    else:
+
+        # =================================================
+        # MOBILENET
+        # =================================================
+        st.markdown(f"""
+        <div class='pred-card'>
+
+        <h3>📱 MobileNetV2</h3>
+
+        <h2 style='color:#4ade80;'>
+        {CLASS_NAMES[idx_mn]}
+        </h2>
+
         </div>
         """, unsafe_allow_html=True)
 
-        if conf_mn < threshold or conf_ef < threshold:
+        st.progress(conf_mn)
 
-            st.error(
-                "Silakan upload ulang gambar daun tomat."
-            )
+        st.write(
+            f"Confidence: {conf_mn*100:.2f}%"
+        )
 
-            st.caption(
-                "Gambar mungkin bukan daun tomat atau kualitas kurang baik."
-            )
+        # =================================================
+        # EFFICIENTNET
+        # =================================================
+        st.markdown(f"""
+        <div class='pred-card'>
 
-        else:
+        <h3>⚡ EfficientNetB0</h3>
 
-            # =============================================
-            # MOBILE NET
-            # =============================================
-            st.markdown(f"""
-            <div class='pred-card'>
+        <h2 style='color:#22d3ee;'>
+        {CLASS_NAMES[idx_ef]}
+        </h2>
 
-            <h3>📱 MobileNetV2</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
-            <h2 style='color:#4ade80;'>
-            {CLASS_NAMES[idx_mn]}
-            </h2>
+        st.progress(conf_ef)
 
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.progress(conf_mn)
-
-            st.write(
-                f"Confidence: {conf_mn*100:.2f}%"
-            )
-
-            # =============================================
-            # EFFICIENT NET
-            # =============================================
-            st.markdown(f"""
-            <div class='pred-card'>
-
-            <h3>⚡ EfficientNetB0</h3>
-
-            <h2 style='color:#22d3ee;'>
-            {CLASS_NAMES[idx_ef]}
-            </h2>
-
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.progress(conf_ef)
-
-            st.write(
-                f"Confidence: {conf_ef*100:.2f}%"
-            )
+        st.write(
+            f"Confidence: {conf_ef*100:.2f}%"
+        )
 
     # =================================================
     # CHART
@@ -718,7 +701,8 @@ if uploaded_file is not None:
     })
 
     st.bar_chart(
-        chart_data.set_index("Class")
+        chart_data.set_index("Class"),
+        height=350
     )
 
 # =====================================================
