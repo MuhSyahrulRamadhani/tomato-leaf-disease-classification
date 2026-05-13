@@ -57,7 +57,7 @@ PORTRAIT LAYOUT
 ===================================================== */
 .block-container {
 
-    max-width: 820px;
+    max-width: 850px;
 
     padding-top: 1.5rem;
 
@@ -131,7 +131,7 @@ GLASS CARD
 
     border-radius: 22px;
 
-    padding: 20px;
+    padding: 18px;
 
     margin-bottom: 18px;
 
@@ -218,16 +218,24 @@ PREVIEW IMAGE
 
     justify-content: center;
 
-    margin-top: 10px;
+    align-items: center;
+
+    height: 100%;
 }
 
 .preview-image img {
 
+    width: 100% !important;
+
+    max-width: 300px !important;
+
+    min-height: 390px !important;
+
+    object-fit: cover;
+
     border-radius: 18px;
 
     border: 1px solid rgba(255,255,255,0.08);
-
-    max-width: 220px !important;
 
     box-shadow: 0 8px 20px rgba(0,0,0,0.18);
 }
@@ -283,7 +291,8 @@ MOBILE
     }
 
     .preview-image img{
-        max-width:180px !important;
+        min-height: auto !important;
+        max-width: 220px !important;
     }
 
 }
@@ -586,7 +595,7 @@ if uploaded_file is not None:
     # =================================================
     # LAYOUT IMAGE + RESULT
     # =================================================
-    col1, col2 = st.columns([1,1])
+    col1, col2 = st.columns([0.95,1.05])
 
     # =================================================
     # IMAGE PREVIEW
@@ -608,7 +617,7 @@ if uploaded_file is not None:
 
         st.image(
             image,
-            width=220
+            use_container_width=True
         )
 
         st.markdown(
