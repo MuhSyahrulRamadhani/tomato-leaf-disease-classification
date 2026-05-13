@@ -57,7 +57,7 @@ PORTRAIT LAYOUT
 ===================================================== */
 .block-container {
 
-    max-width: 780px;
+    max-width: 820px;
 
     padding-top: 1.5rem;
 
@@ -131,7 +131,7 @@ GLASS CARD
 
     border-radius: 24px;
 
-    padding: 24px;
+    padding: 22px;
 
     margin-bottom: 20px;
 
@@ -210,26 +210,6 @@ SELECTBOX
 }
 
 /* =====================================================
-PREDICTION CARD
-===================================================== */
-.pred-card {
-
-    background: linear-gradient(
-        135deg,
-        rgba(255,255,255,0.06),
-        rgba(255,255,255,0.03)
-    );
-
-    border: 1px solid rgba(255,255,255,0.08);
-
-    border-radius: 20px;
-
-    padding: 22px;
-
-    margin-bottom: 20px;
-}
-
-/* =====================================================
 PREVIEW IMAGE
 ===================================================== */
 .preview-image {
@@ -247,9 +227,21 @@ PREVIEW IMAGE
 
     border: 1px solid rgba(255,255,255,0.08);
 
-    max-width: 240px !important;
+    max-width: 220px !important;
 
     box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+}
+
+/* =====================================================
+TABLE
+===================================================== */
+[data-testid="stDataFrame"] {
+
+    border-radius: 18px;
+
+    overflow: hidden;
+
+    border: 1px solid rgba(255,255,255,0.08);
 }
 
 /* =====================================================
@@ -291,7 +283,7 @@ MOBILE
     }
 
     .preview-image img{
-        max-width:200px !important;
+        max-width:180px !important;
     }
 
 }
@@ -550,30 +542,6 @@ if uploaded_file is not None:
     image = Image.open(uploaded_file)
 
     # =================================================
-    # IMAGE PREVIEW
-    # =================================================
-    st.markdown("""
-    <div class='glass-card'>
-    <h3>🖼 Preview Gambar</h3>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown(
-        "<div class='preview-image'>",
-        unsafe_allow_html=True
-    )
-
-    st.image(
-        image,
-        width=240
-    )
-
-    st.markdown(
-        "</div>",
-        unsafe_allow_html=True
-    )
-
-    # =================================================
     # PREPROCESS
     # =================================================
     x_mn = preprocess_mobilenet(image)
@@ -616,69 +584,96 @@ if uploaded_file is not None:
     threshold = CONF_THRESHOLDS[variant]
 
     # =================================================
+    # LAYOUT IMAGE + RESULT
+    # =================================================
+    col1, col2 = st.columns([1,1])
+
+    # =================================================
+    # IMAGE PREVIEW
+    # =================================================
+    with col1:
+
+        st.markdown("""
+        <div class='glass-card'>
+        <h3 style='text-align:center;'>
+        🖼 Preview Gambar
+        </h3>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown(
+            "<div class='preview-image'>",
+            unsafe_allow_html=True
+        )
+
+        st.image(
+            image,
+            width=220
+        )
+
+        st.markdown(
+            "</div>",
+            unsafe_allow_html=True
+        )
+
+    # =================================================
     # RESULT
     # =================================================
-    st.write("")
+    with col2:
 
-    st.markdown("""
-    <div class='glass-card'>
-    <h3>🤖 Hasil Prediksi AI</h3>
-    </div>
-    """, unsafe_allow_html=True)
-
-    if conf_mn < threshold or conf_ef < threshold:
-
-        st.error(
-            "Silakan upload ulang gambar daun tomat."
-        )
-
-        st.caption(
-            "Gambar mungkin bukan daun tomat atau kualitas kurang baik."
-        )
-
-    else:
-
-        # =================================================
-        # MOBILENET
-        # =================================================
-        st.markdown(f"""
-        <div class='pred-card'>
-
-        <h3>📱 MobileNetV2</h3>
-
-        <h2 style='color:#4ade80;'>
-        {CLASS_NAMES[idx_mn]}
-        </h2>
-
+        st.markdown("""
+        <div class='glass-card'>
+        <h3 style='text-align:center;'>
+        🤖 Hasil Prediksi
+        </h3>
         </div>
         """, unsafe_allow_html=True)
 
-        st.progress(conf_mn)
+        if conf_mn < threshold or conf_ef < threshold:
 
-        st.write(
-            f"Confidence: {conf_mn*100:.2f}%"
-        )
+            st.error(
+                "Silakan upload ulang gambar daun tomat."
+            )
 
-        # =================================================
-        # EFFICIENTNET
-        # =================================================
-        st.markdown(f"""
-        <div class='pred-card'>
+            st.caption(
+                "Gambar kurang sesuai atau kualitas rendah."
+            )
 
-        <h3>⚡ EfficientNetB0</h3>
+        else:
 
-        <h2 style='color:#22d3ee;'>
-        {CLASS_NAMES[idx_ef]}
-        </h2>
+            result_df = pd.DataFrame({
 
-        </div>
-        """, unsafe_allow_html=True)
+                "Model": [
+                    "MobileNetV2",
+                    "EfficientNetB0"
+                ],
 
-        st.progress(conf_ef)
+                "Prediksi": [
+                    CLASS_NAMES[idx_mn],
+                    CLASS_NAMES[idx_ef]
+                ],
 
-        st.write(
-            f"Confidence: {conf_ef*100:.2f}%"
-        )
+                "Confidence": [
+                    f"{conf_mn*100:.2f}%",
+                    f"{conf_ef*100:.2f}%"
+                ]
+            })
+
+            st.dataframe(
+                result_df,
+                use_container_width=True,
+                hide_index=True
+            )
+
+            st.write("")
+
+            st.markdown("#### 📱 MobileNetV2")
+
+            st.progress(conf_mn)
+
+            st.markdown("#### ⚡ EfficientNetB0")
+
+            st.progress(conf_ef)
 
     # =================================================
     # CHART
