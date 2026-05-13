@@ -20,7 +20,111 @@ st.set_page_config(
     page_title="Klasifikasi Penyakit Daun Tomat",
     layout="centered"
 )
+# ============================================
+# DARK MODE CSS
+# ============================================
+st.markdown("""
+<style>
 
+/* BACKGROUND */
+.stApp {
+    background: linear-gradient(
+        135deg,
+        #050505,
+        #0b1d1a,
+        #102b25
+    );
+    color: white;
+}
+
+/* MAIN CONTAINER */
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* TEXT */
+h1, h2, h3, h4, h5, h6, p, label, div {
+    color: white !important;
+}
+
+/* SIDEBAR */
+[data-testid="stSidebar"] {
+    background-color: #050505;
+    border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+/* SIDEBAR TEXT */
+[data-testid="stSidebar"] * {
+    color: white !important;
+}
+
+/* SELECTBOX */
+.stSelectbox label {
+    color: white !important;
+    font-weight: bold;
+}
+
+/* SELECTBOX FIELD */
+.stSelectbox div[data-baseweb="select"] > div {
+    background-color: white !important;
+    color: black !important;
+    border-radius: 10px;
+}
+
+/* SELECTBOX TEXT */
+.stSelectbox div[data-baseweb="select"] span {
+    color: black !important;
+}
+
+/* DROPDOWN MENU */
+div[data-baseweb="popover"] * {
+    color: black !important;
+}
+
+/* FILE UPLOADER */
+[data-testid="stFileUploader"] {
+    background-color: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 15px;
+}
+
+/* EXPANDER */
+.streamlit-expanderHeader {
+    background-color: rgba(255,255,255,0.05);
+    border-radius: 10px;
+}
+
+/* CHART */
+canvas {
+    background-color: rgba(255,255,255,0.02);
+    border-radius: 10px;
+}
+
+/* IMAGE */
+img {
+    border-radius: 18px;
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 768px) {
+
+    h1 {
+        font-size: 28px !important;
+    }
+
+    h2 {
+        font-size: 22px !important;
+    }
+
+    h3 {
+        font-size: 18px !important;
+    }
+
+}
+
+</style>
+""", unsafe_allow_html=True)
 # ============================================
 # CLASS NAMES
 # ============================================
