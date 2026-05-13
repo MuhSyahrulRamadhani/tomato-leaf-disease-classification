@@ -83,7 +83,7 @@ TITLE
 ===================================================== */
 .main-title {
 
-    font-size: 48px;
+    font-size: 46px;
 
     font-weight: 800;
 
@@ -129,11 +129,11 @@ GLASS CARD
 
     border: 1px solid rgba(255,255,255,0.08);
 
-    border-radius: 24px;
+    border-radius: 22px;
 
-    padding: 22px;
+    padding: 20px;
 
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 
     box-shadow: 0 8px 24px rgba(0,0,0,0.18);
 }
@@ -149,11 +149,11 @@ METRIC CARD
         rgba(255,255,255,0.03)
     );
 
-    border-radius: 20px;
+    border-radius: 18px;
 
     border: 1px solid rgba(255,255,255,0.08);
 
-    padding: 20px;
+    padding: 18px;
 
     text-align: center;
 }
@@ -162,12 +162,12 @@ METRIC CARD
 
     color: #9ca3af;
 
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .metric-value {
 
-    font-size: 26px;
+    font-size: 24px;
 
     font-weight: 700;
 
@@ -183,9 +183,9 @@ UPLOAD BOX
 
     border: 2px dashed rgba(255,255,255,0.15);
 
-    border-radius: 20px;
+    border-radius: 18px;
 
-    padding: 20px;
+    padding: 18px;
 }
 
 /* =====================================================
@@ -264,7 +264,7 @@ FOOTER
 
     color:#6b7280;
 
-    margin-top:50px;
+    margin-top:40px;
 
     padding:20px;
 }
@@ -617,7 +617,7 @@ if uploaded_file is not None:
         )
 
     # =================================================
-    # RESULT
+    # RESULT + PROBABILITY
     # =================================================
     with col2:
 
@@ -641,6 +641,9 @@ if uploaded_file is not None:
 
         else:
 
+            # =============================================
+            # RESULT TABLE
+            # =============================================
             result_df = pd.DataFrame({
 
                 "Model": [
@@ -667,67 +670,38 @@ if uploaded_file is not None:
 
             st.write("")
 
-            st.markdown("#### 📱 MobileNetV2")
+            # =============================================
+            # PROBABILITY TABLE
+            # =============================================
+            st.markdown("""
+            <div class='glass-card'>
+            <h4 style='text-align:center;'>
+            📊 Probability Distribution
+            </h4>
+            </div>
+            """, unsafe_allow_html=True)
 
-            st.progress(conf_mn)
+            prob_df = pd.DataFrame({
 
-            st.markdown("#### ⚡ EfficientNetB0")
+                "Class": CLASS_NAMES,
 
-            st.progress(conf_ef)
+                "MN": [
+                    f"{p*100:.1f}%"
+                    for p in pred_mn
+                ],
 
-    # =================================================
-    # CHART MOBILENET
-    # =================================================
-    st.write("")
+                "EF": [
+                    f"{p*100:.1f}%"
+                    for p in pred_ef
+                ]
+            })
 
-    st.markdown("""
-    <div class='glass-card'>
-    <h3 style='text-align:center;'>
-    📈 Probability Distribution
-    <br>
-    MobileNetV2
-    </h3>
-    </div>
-    """, unsafe_allow_html=True)
-
-    chart_mn = pd.DataFrame({
-
-        "Class": CLASS_NAMES,
-
-        "Probability": pred_mn
-    })
-
-    st.bar_chart(
-        chart_mn.set_index("Class"),
-        height=260
-    )
-
-    # =================================================
-    # CHART EFFICIENTNET
-    # =================================================
-    st.write("")
-
-    st.markdown("""
-    <div class='glass-card'>
-    <h3 style='text-align:center;'>
-    📈 Probability Distribution
-    <br>
-    EfficientNetB0
-    </h3>
-    </div>
-    """, unsafe_allow_html=True)
-
-    chart_ef = pd.DataFrame({
-
-        "Class": CLASS_NAMES,
-
-        "Probability": pred_ef
-    })
-
-    st.bar_chart(
-        chart_ef.set_index("Class"),
-        height=260
-    )
+            st.dataframe(
+                prob_df,
+                use_container_width=True,
+                hide_index=True,
+                height=390
+            )
 
 # =====================================================
 # FOOTER
