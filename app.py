@@ -2,6 +2,7 @@ import streamlit as st
 import tensorflow as tf
 import numpy as np
 from PIL import Image
+import pandas as pd
 import os
 import gdown
 
@@ -13,175 +14,251 @@ from tensorflow.keras.applications.efficientnet import (
     preprocess_input as efficientnet_preprocess
 )
 
-# ============================================
+# =====================================================
 # PAGE CONFIG
-# ============================================
+# =====================================================
 st.set_page_config(
-    page_title="Klasifikasi Penyakit Daun Tomat",
-    layout="centered"
+    page_title="AI Tomato Disease Detection",
+    page_icon="🍅",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# ============================================
-# MODERN DARK UI
-# ============================================
+# =====================================================
+# MODERN UI
+# =====================================================
 st.markdown("""
 <style>
 
-/* IMPORT FONT */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* MAIN APP */
-.stApp {
-
-    background: #050816;
-    color: white;
+html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
 }
 
-/* CONTAINER */
+/* =====================================================
+BACKGROUND
+===================================================== */
+.stApp {
+    background:
+    radial-gradient(circle at top left, #16325B 0%, transparent 25%),
+    radial-gradient(circle at bottom right, #14532d 0%, transparent 25%),
+    linear-gradient(135deg, #020617 0%, #07111f 50%, #020617 100%);
+    color: white;
+}
+
+/* =====================================================
+CONTAINER
+===================================================== */
 .block-container {
-
-    max-width: 900px;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding-top: 1.5rem;
+    max-width: 1400px;
 }
 
-/* TEXT */
-h1,h2,h3,h4,h5,h6 {
+/* =====================================================
+SIDEBAR
+===================================================== */
+[data-testid="stSidebar"] {
+    background: rgba(10,15,25,0.9);
+    border-right: 1px solid rgba(255,255,255,0.08);
+}
 
+[data-testid="stSidebar"] * {
     color: white !important;
-    font-family: 'Poppins', sans-serif;
 }
 
-p,label,div,span {
-
-    color: #d6d6d6 !important;
-}
-
-/* TITLE */
-h1 {
-
-    font-size: 42px !important;
-    font-weight: 700 !important;
+/* =====================================================
+TITLE
+===================================================== */
+.main-title {
+    font-size: 60px;
+    font-weight: 800;
+    line-height: 1.1;
     margin-bottom: 10px;
 }
 
-/* SUBTITLE */
+.gradient-text {
+    background: linear-gradient(
+        90deg,
+        #4ade80,
+        #22d3ee
+    );
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 .subtitle {
-
     color: #9ca3af;
-    font-size: 16px;
-    margin-bottom: 30px;
+    font-size: 18px;
+    margin-top: 10px;
 }
 
-/* LINE */
-hr {
+/* =====================================================
+GLASS CARD
+===================================================== */
+.glass-card {
+    background: rgba(255,255,255,0.05);
+
+    backdrop-filter: blur(14px);
 
     border: 1px solid rgba(255,255,255,0.08);
+
+    border-radius: 24px;
+
+    padding: 25px;
+
+    margin-bottom: 20px;
+
+    box-shadow: 0 0 25px rgba(0,0,0,0.2);
 }
 
-/* SIDEBAR */
-[data-testid="stSidebar"] {
+/* =====================================================
+METRIC CARD
+===================================================== */
+.metric-card {
 
-    background-color: #030712;
-    border-right: 1px solid rgba(255,255,255,0.05);
-}
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.07),
+        rgba(255,255,255,0.03)
+    );
 
-/* SIDEBAR TEXT */
-[data-testid="stSidebar"] * {
+    border-radius: 22px;
 
-    color: white !important;
-}
-
-/* SELECTBOX */
-.stSelectbox label {
-
-    color: white !important;
-    font-weight: 600;
-}
-
-/* SELECTBOX FIELD */
-.stSelectbox div[data-baseweb="select"] > div {
-
-    background-color: #111827 !important;
     border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 10px;
-    color: white !important;
+
+    padding: 24px;
+
+    text-align: center;
+
+    transition: 0.3s;
 }
 
-/* SELECTBOX TEXT */
-.stSelectbox div[data-baseweb="select"] span {
-
-    color: white !important;
+.metric-card:hover {
+    transform: translateY(-4px);
 }
 
-/* DROPDOWN */
-div[data-baseweb="popover"] * {
-
-    color: white !important;
-    background-color: #111827 !important;
+.metric-title {
+    color: #9ca3af;
+    font-size: 14px;
 }
 
-/* EXPANDER */
-.streamlit-expanderHeader {
-
-    background-color: rgba(255,255,255,0.03);
-    border-radius: 10px;
-    padding: 12px;
-    border: 1px solid rgba(255,255,255,0.06);
+.metric-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
 }
 
-/* EXPANDER CONTENT */
-.streamlit-expanderContent {
-
-    background-color: rgba(255,255,255,0.02);
-    border-radius: 0 0 10px 10px;
-    border: 1px solid rgba(255,255,255,0.04);
-}
-
-/* FILE UPLOADER */
+/* =====================================================
+UPLOAD BOX
+===================================================== */
 [data-testid="stFileUploader"] {
 
-    background-color: rgba(255,255,255,0.04);
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.05);
-    padding: 10px;
+    background: rgba(255,255,255,0.05);
+
+    border: 2px dashed rgba(255,255,255,0.15);
+
+    border-radius: 20px;
+
+    padding: 20px;
 }
 
-/* BUTTON */
+/* =====================================================
+SELECTBOX
+===================================================== */
+.stSelectbox label {
+    color: white !important;
+    font-weight: 700;
+}
+
+.stSelectbox div[data-baseweb="select"] > div {
+
+    background: rgba(255,255,255,0.06);
+
+    border-radius: 14px;
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    color: white;
+}
+
+/* =====================================================
+BUTTON
+===================================================== */
 .stButton button {
 
-    background-color: #111827;
-    color: white;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.06);
-}
+    width: 100%;
 
-/* IMAGE */
-img {
+    background: linear-gradient(
+        90deg,
+        #22c55e,
+        #06b6d4
+    );
+
+    color: white;
+
+    border: none;
 
     border-radius: 16px;
+
+    padding: 14px;
+
+    font-weight: 700;
 }
 
-/* CHART */
-canvas {
+/* =====================================================
+PREDICTION CARD
+===================================================== */
+.pred-card {
 
-    background-color: rgba(255,255,255,0.01);
-    border-radius: 12px;
+    background: linear-gradient(
+        135deg,
+        rgba(34,197,94,0.15),
+        rgba(6,182,212,0.08)
+    );
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    border-radius: 24px;
+
+    padding: 24px;
+
+    margin-bottom: 20px;
 }
 
-/* MOBILE */
-@media (max-width: 768px) {
+/* =====================================================
+TEXT
+===================================================== */
+h1,h2,h3,h4,h5,h6 {
+    color: white !important;
+}
 
-    h1 {
+p,span,label,div {
+    color: #d1d5db;
+}
 
-        font-size: 30px !important;
+/* =====================================================
+FOOTER
+===================================================== */
+.footer {
+    text-align:center;
+    color:#6b7280;
+    margin-top:50px;
+    padding:20px;
+}
+
+/* =====================================================
+MOBILE
+===================================================== */
+@media(max-width:768px){
+
+    .main-title{
+        font-size:38px;
     }
 
-    .block-container {
-
-        padding-left: 1rem;
-        padding-right: 1rem;
+    .subtitle{
+        font-size:15px;
     }
 
 }
@@ -189,9 +266,9 @@ canvas {
 </style>
 """, unsafe_allow_html=True)
 
-# ============================================
-# CLASS NAMES
-# ============================================
+# =====================================================
+CLASS NAMES
+# =====================================================
 CLASS_NAMES = [
     "Bacterial Spot",
     "Early Blight",
@@ -205,9 +282,9 @@ CLASS_NAMES = [
     "Healthy"
 ]
 
-# ============================================
-# CONFIDENCE THRESHOLD
-# ============================================
+# =====================================================
+CONFIDENCE
+# =====================================================
 CONF_THRESHOLDS = {
     "FF": 0.50,
     "FT10": 0.53,
@@ -215,9 +292,9 @@ CONF_THRESHOLDS = {
     "FT30": 0.50
 }
 
-# ============================================
-# MODEL CONFIG
-# ============================================
+# =====================================================
+MODEL CONFIG
+# =====================================================
 MODEL_URLS = {
 
     "FF": {
@@ -273,350 +350,353 @@ MODEL_URLS = {
     }
 }
 
-# ============================================
-# DOWNLOAD MODEL
-# ============================================
+# =====================================================
+DOWNLOAD MODEL
+# =====================================================
 def download_model(file_id, output_path):
 
-    try:
+    if not os.path.exists(output_path):
 
-        if not os.path.exists(output_path):
+        url = f"https://drive.google.com/uc?id={file_id}"
 
-            url = f"https://drive.google.com/uc?id={file_id}"
+        with st.spinner(f"Downloading {output_path} ..."):
 
-            with st.spinner(f"Downloading {output_path} ..."):
-
-                gdown.download(
-                    url,
-                    output_path,
-                    quiet=False
-                )
-
-            if not os.path.exists(output_path):
-
-                raise Exception(
-                    f"Failed to download {output_path}"
-                )
-
-    except Exception as e:
-
-        st.error(f"Download error: {str(e)}")
-        raise e
-
-# ============================================
-# LOAD MODEL
-# ============================================
-@st.cache_resource
-def load_single_model(model_name, variant):
-
-    try:
-
-        info = MODEL_URLS[variant][model_name]
-
-        # DOWNLOAD MODEL
-        download_model(
-            info["file_id"],
-            info["path"]
-        )
-
-        # VALIDASI FILE
-        if not os.path.exists(info["path"]):
-
-            raise Exception(
-                f"Model file not found: {info['path']}"
+            gdown.download(
+                url,
+                output_path,
+                quiet=False
             )
 
-        # LOAD MODEL
-        model = tf.keras.models.load_model(
-            info["path"],
-            compile=False
-        )
+# =====================================================
+LOAD MODEL
+# =====================================================
+@st.cache_resource
+def load_model(model_name, variant):
 
-        return model
+    info = MODEL_URLS[variant][model_name]
 
-    except Exception as e:
+    download_model(
+        info["file_id"],
+        info["path"]
+    )
 
-        st.error(f"Model load error: {str(e)}")
-        raise e
+    model = tf.keras.models.load_model(
+        info["path"],
+        compile=False
+    )
 
-# ============================================
-# PREPROCESSING
-# ============================================
-def preprocess_mobilenet(img: Image.Image):
+    return model
+
+# =====================================================
+PREPROCESS
+# =====================================================
+def preprocess_mobilenet(img):
 
     img = img.convert("RGB")
-    img = img.resize((224, 224))
+    img = img.resize((224,224))
 
     img = np.array(img, dtype=np.float32)
     img = np.expand_dims(img, axis=0)
 
-    img = mobilenet_preprocess(img)
+    return mobilenet_preprocess(img)
 
-    return img
-
-
-def preprocess_efficientnet(img: Image.Image):
+def preprocess_efficientnet(img):
 
     img = img.convert("RGB")
-    img = img.resize((224, 224))
+    img = img.resize((224,224))
 
     img = np.array(img, dtype=np.float32)
     img = np.expand_dims(img, axis=0)
 
-    img = efficientnet_preprocess(img)
+    return efficientnet_preprocess(img)
 
-    return img
+# =====================================================
+SIDEBAR
+# =====================================================
+with st.sidebar:
 
-# ============================================
-# UI
-# ============================================
-st.title("Klasifikasi Penyakit Daun Tomat")
+    st.markdown("""
+    # 🍅 Tomato AI
+    """)
 
-st.write(
-    """
-    Sistem ini membandingkan performa klasifikasi penyakit daun tomat 
-    menggunakan model transfer learning MobileNetV2 dan EfficientNetB0 
-    pada berbagai skenario pelatihan.
-    """
-)
-
-st.markdown("---")
-
-# ============================================
-# INFORMASI PENYAKIT
-# ============================================
-st.subheader("Informasi Kelas Penyakit")
-
-with st.expander("🟤 Bacterial Spot"):
-    st.write(
-        "Penyakit bercak bakteri yang menyebabkan "
-        "bercak kecil coklat gelap pada daun."
+    st.caption(
+        "Deep Learning Classification System"
     )
 
-with st.expander("🟠 Early Blight"):
-    st.write(
-        "Ditandai bercak melingkar seperti cincin target pada daun."
+    st.markdown("---")
+
+    st.markdown("""
+    ### ⚙ Pilih Skenario Model
+    """)
+
+    variant = st.selectbox(
+        "",
+        ["FF", "FT10", "FT20", "FT30"]
     )
 
-with st.expander("⚫ Late Blight"):
-    st.write(
-        "Penyakit dengan bercak gelap basah yang cepat menyebar."
+    st.markdown("---")
+
+    st.metric(
+        "Jumlah Kelas",
+        "10"
     )
 
-with st.expander("🟢 Leaf Mold"):
-    st.write(
-        "Menyebabkan bercak kekuningan dan pertumbuhan jamur."
+    st.metric(
+        "Input Size",
+        "224x224"
     )
 
-with st.expander("🟡 Septoria Leaf Spot"):
-    st.write(
-        "Bercak kecil abu-abu dengan tepi gelap."
+    st.metric(
+        "Framework",
+        "TensorFlow"
     )
 
-with st.expander("🕷 Spider Mites"):
-    st.write(
-        "Serangan tungau yang merusak jaringan daun."
-    )
+    st.markdown("---")
 
-with st.expander("🎯 Target Spot"):
-    st.write(
-        "Bercak melingkar menyerupai target."
-    )
+    st.markdown("""
+    ### 🧠 Model
+    - MobileNetV2
+    - EfficientNetB0
+    """)
 
-with st.expander("🦠 Tomato Mosaic Virus"):
-    st.write(
-        "Virus yang menyebabkan pola mosaik."
-    )
+# =====================================================
+HERO SECTION
+# =====================================================
+st.markdown("""
+<div class='glass-card'>
 
-with st.expander("🌿 Tomato Yellow Leaf Curl Virus"):
-    st.write(
-        "Virus yang menyebabkan daun menguning dan melengkung."
-    )
+<div class='main-title'>
+🍅 <span class='gradient-text'>
+AI Tomato Disease Detection
+</span>
+</div>
 
-with st.expander("✅ Healthy"):
-    st.write(
-        "Daun tomat sehat tanpa gejala penyakit."
-    )
+<div class='subtitle'>
+Sistem klasifikasi penyakit daun tomat menggunakan
+Transfer Learning MobileNetV2 dan EfficientNetB0.
+</div>
 
-# ============================================
-# MODEL SELECTOR
-# ============================================
-variant = st.selectbox(
-    "Pilih Skenario Model",
-    ["FF", "FT10", "FT20", "FT30"]
-)
+</div>
+""", unsafe_allow_html=True)
 
-# ============================================
-# FILE UPLOADER
-# ============================================
+# =====================================================
+METRIC CARDS
+# =====================================================
+c1, c2, c3 = st.columns(3)
+
+with c1:
+    st.markdown("""
+    <div class='metric-card'>
+        <div class='metric-title'>Classes</div>
+        <div class='metric-value'>10</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with c2:
+    st.markdown("""
+    <div class='metric-card'>
+        <div class='metric-title'>Models</div>
+        <div class='metric-value'>2</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with c3:
+    st.markdown("""
+    <div class='metric-card'>
+        <div class='metric-title'>Scenario</div>
+        <div class='metric-value'>""" + variant + """</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.write("")
+
+# =====================================================
+UPLOAD
+# =====================================================
+st.markdown("""
+<div class='glass-card'>
+<h3>📤 Upload Gambar Daun Tomat</h3>
+<p>
+Upload gambar daun tomat untuk dilakukan prediksi penyakit menggunakan AI.
+</p>
+</div>
+""", unsafe_allow_html=True)
+
 uploaded_file = st.file_uploader(
-    "Upload Gambar Daun Tomat",
+    "",
     type=["jpg", "jpeg", "png"]
 )
 
-# ============================================
-# INFERENCE
-# ============================================
+# =====================================================
+INFERENCE
+# =====================================================
 if uploaded_file is not None:
 
-    try:
+    image = Image.open(uploaded_file)
 
-        image = Image.open(uploaded_file)
+    col1, col2 = st.columns([1,1])
 
-        st.subheader("Gambar Input")
+    # =================================================
+    # IMAGE
+    # =================================================
+    with col1:
 
-        col_l, col_c, col_r = st.columns([1, 2, 1])
+        st.markdown("""
+        <div class='glass-card'>
+        <h3>🖼 Preview Gambar</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
-        with col_c:
+        st.image(
+            image,
+            use_container_width=True
+        )
 
-            st.image(
-                image,
-                use_container_width=True
-            )
+    # =================================================
+    # PREPROCESS
+    # =================================================
+    x_mn = preprocess_mobilenet(image)
+    x_ef = preprocess_efficientnet(image)
 
-        st.markdown("---")
+    # =================================================
+    # LOAD MODEL
+    # =================================================
+    with st.spinner("Loading AI Models..."):
 
-        # ============================================
-        # PREPROCESS
-        # ============================================
-        x_mn = preprocess_mobilenet(image)
-        x_ef = preprocess_efficientnet(image)
+        model_mn = load_model(
+            "MobileNetV2",
+            variant
+        )
 
-        # ============================================
-        # LOAD MODEL
-        # ============================================
-        with st.spinner("Loading MobileNetV2 ..."):
+        model_ef = load_model(
+            "EfficientNetB0",
+            variant
+        )
 
-            model_mn = load_single_model(
-                "MobileNetV2",
-                variant
-            )
+    # =================================================
+    # PREDICT
+    # =================================================
+    pred_mn = model_mn.predict(
+        x_mn,
+        verbose=0
+    )[0]
 
-        with st.spinner("Loading EfficientNetB0 ..."):
+    pred_ef = model_ef.predict(
+        x_ef,
+        verbose=0
+    )[0]
 
-            model_ef = load_single_model(
-                "EfficientNetB0",
-                variant
-            )
+    conf_mn = float(np.max(pred_mn))
+    conf_ef = float(np.max(pred_ef))
 
-        # ============================================
-        # PREDICTION
-        # ============================================
-        pred_mn = model_mn.predict(
-            x_mn,
-            verbose=0
-        )[0]
+    idx_mn = int(np.argmax(pred_mn))
+    idx_ef = int(np.argmax(pred_ef))
 
-        pred_ef = model_ef.predict(
-            x_ef,
-            verbose=0
-        )[0]
+    threshold = CONF_THRESHOLDS[variant]
 
-        # ============================================
-        # CONFIDENCE
-        # ============================================
-        conf_mn = float(np.max(pred_mn))
-        conf_ef = float(np.max(pred_ef))
+    # =================================================
+    # RESULT
+    # =================================================
+    with col2:
 
-        idx_mn = int(np.argmax(pred_mn))
-        idx_ef = int(np.argmax(pred_ef))
+        st.markdown("""
+        <div class='glass-card'>
+        <h3>🤖 Hasil Prediksi AI</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
-        threshold = CONF_THRESHOLDS[variant]
-
-        # ============================================
+        # =============================================
         # CONFIDENCE GATE
-        # ============================================
+        # =============================================
         if conf_mn < threshold or conf_ef < threshold:
 
-            st.markdown("---")
-
-            st.markdown(
-                """
-                <h4 style='text-align:center; color:red;'>
-                Silakan upload ulang gambar daun tomat
-                </h4>
-                """,
-                unsafe_allow_html=True
+            st.error(
+                "Silakan upload ulang gambar daun tomat."
             )
 
             st.caption(
-                "Gambar mungkin bukan daun tomat "
-                "atau kualitas gambar kurang baik."
+                "Gambar mungkin bukan daun tomat atau kualitas kurang baik."
             )
 
         else:
 
-            st.markdown("---")
+            # =========================================
+            # MOBILE NET
+            # =========================================
+            st.markdown(f"""
+            <div class='pred-card'>
 
-            st.subheader(
-                f"Hasil Prediksi ({variant})"
+            <h3>📱 MobileNetV2</h3>
+
+            <h2 style='color:#4ade80;'>
+            {CLASS_NAMES[idx_mn]}
+            </h2>
+
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.progress(conf_mn)
+
+            st.write(
+                f"Confidence: {conf_mn*100:.2f}%"
             )
 
-            col1, col2 = st.columns(2)
+            # =========================================
+            # EFFICIENT NET
+            # =========================================
+            st.markdown(f"""
+            <div class='pred-card'>
 
-            # ============================================
-            # MOBILENETV2
-            # ============================================
-            with col1:
+            <h3>⚡ EfficientNetB0</h3>
 
-                st.markdown("### MobileNetV2")
+            <h2 style='color:#22d3ee;'>
+            {CLASS_NAMES[idx_ef]}
+            </h2>
 
-                st.write(
-                    f"**Prediksi:** "
-                    f"{CLASS_NAMES[idx_mn]}"
-                )
+            </div>
+            """, unsafe_allow_html=True)
 
-                st.write(
-                    f"**Confidence:** "
-                    f"{conf_mn*100:.2f}%"
-                )
+            st.progress(conf_ef)
 
-                st.bar_chart(
-                    {
-                        CLASS_NAMES[i]: float(pred_mn[i])
-                        for i in range(len(CLASS_NAMES))
-                    }
-                )
+            st.write(
+                f"Confidence: {conf_ef*100:.2f}%"
+            )
 
-            # ============================================
-            # EFFICIENTNETB0
-            # ============================================
-            with col2:
+    # =================================================
+    # CHART
+    # =================================================
+    st.write("")
 
-                st.markdown("### EfficientNetB0")
+    st.markdown("""
+    <div class='glass-card'>
+    <h3>📈 Probability Distribution</h3>
+    </div>
+    """, unsafe_allow_html=True)
 
-                st.write(
-                    f"**Prediksi:** "
-                    f"{CLASS_NAMES[idx_ef]}"
-                )
+    chart_data = pd.DataFrame({
 
-                st.write(
-                    f"**Confidence:** "
-                    f"{conf_ef*100:.2f}%"
-                )
+        "Class": CLASS_NAMES,
 
-                st.bar_chart(
-                    {
-                        CLASS_NAMES[i]: float(pred_ef[i])
-                        for i in range(len(CLASS_NAMES))
-                    }
-                )
+        "MobileNetV2": pred_mn,
 
-    except Exception as e:
+        "EfficientNetB0": pred_ef
+    })
 
-        st.exception(e)
+    st.bar_chart(
+        chart_data.set_index("Class")
+    )
 
-# ============================================
+# =====================================================
 # FOOTER
-# ============================================
-st.markdown("---")
+# =====================================================
+st.markdown("""
+<div class='footer'>
 
-st.caption(
-    """
-    Skripsi:
-    Perbandingan Efektivitas dan Efisiensi 
-    Model Transfer Learning MobileNetV2 
-    dan EfficientNetB0 pada Klasifikasi 
-    Penyakit Daun Tomat
-    """
-)
+Skripsi —
+Perbandingan Efektivitas dan Efisiensi
+Model Transfer Learning MobileNetV2
+dan EfficientNetB0 pada Klasifikasi
+Penyakit Daun Tomat
+
+</div>
+""", unsafe_allow_html=True)
