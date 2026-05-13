@@ -1,3 +1,6 @@
+# =====================================================
+# IMPORT LIBRARY
+# =====================================================
 import streamlit as st
 import tensorflow as tf
 import numpy as np
@@ -59,7 +62,7 @@ CONTAINER
 SIDEBAR
 ===================================================== */
 [data-testid="stSidebar"] {
-    background: rgba(10,15,25,0.9);
+    background: rgba(10,15,25,0.95);
     border-right: 1px solid rgba(255,255,255,0.08);
 }
 
@@ -71,7 +74,7 @@ SIDEBAR
 TITLE
 ===================================================== */
 .main-title {
-    font-size: 60px;
+    font-size: 58px;
     font-weight: 800;
     line-height: 1.1;
     margin-bottom: 10px;
@@ -98,6 +101,7 @@ TITLE
 GLASS CARD
 ===================================================== */
 .glass-card {
+
     background: rgba(255,255,255,0.05);
 
     backdrop-filter: blur(14px);
@@ -267,7 +271,7 @@ MOBILE
 """, unsafe_allow_html=True)
 
 # =====================================================
-CLASS NAMES
+# CLASS NAMES
 # =====================================================
 CLASS_NAMES = [
     "Bacterial Spot",
@@ -283,7 +287,7 @@ CLASS_NAMES = [
 ]
 
 # =====================================================
-CONFIDENCE
+# CONFIDENCE THRESHOLD
 # =====================================================
 CONF_THRESHOLDS = {
     "FF": 0.50,
@@ -293,7 +297,7 @@ CONF_THRESHOLDS = {
 }
 
 # =====================================================
-MODEL CONFIG
+# MODEL CONFIG
 # =====================================================
 MODEL_URLS = {
 
@@ -351,7 +355,7 @@ MODEL_URLS = {
 }
 
 # =====================================================
-DOWNLOAD MODEL
+# DOWNLOAD MODEL
 # =====================================================
 def download_model(file_id, output_path):
 
@@ -368,7 +372,7 @@ def download_model(file_id, output_path):
             )
 
 # =====================================================
-LOAD MODEL
+# LOAD MODEL
 # =====================================================
 @st.cache_resource
 def load_model(model_name, variant):
@@ -388,7 +392,7 @@ def load_model(model_name, variant):
     return model
 
 # =====================================================
-PREPROCESS
+# PREPROCESS
 # =====================================================
 def preprocess_mobilenet(img):
 
@@ -411,13 +415,11 @@ def preprocess_efficientnet(img):
     return efficientnet_preprocess(img)
 
 # =====================================================
-SIDEBAR
+# SIDEBAR
 # =====================================================
 with st.sidebar:
 
-    st.markdown("""
-    # 🍅 Tomato AI
-    """)
+    st.markdown("# 🍅 Tomato AI")
 
     st.caption(
         "Deep Learning Classification System"
@@ -425,9 +427,7 @@ with st.sidebar:
 
     st.markdown("---")
 
-    st.markdown("""
-    ### ⚙ Pilih Skenario Model
-    """)
+    st.markdown("### ⚙ Pilih Skenario Model")
 
     variant = st.selectbox(
         "",
@@ -460,7 +460,7 @@ with st.sidebar:
     """)
 
 # =====================================================
-HERO SECTION
+# HERO SECTION
 # =====================================================
 st.markdown("""
 <div class='glass-card'>
@@ -480,11 +480,12 @@ Transfer Learning MobileNetV2 dan EfficientNetB0.
 """, unsafe_allow_html=True)
 
 # =====================================================
-METRIC CARDS
+# METRIC CARDS
 # =====================================================
-c1, c2, c3 = st.columns(3)
+col1, col2, col3 = st.columns(3)
 
-with c1:
+with col1:
+
     st.markdown("""
     <div class='metric-card'>
         <div class='metric-title'>Classes</div>
@@ -492,7 +493,8 @@ with c1:
     </div>
     """, unsafe_allow_html=True)
 
-with c2:
+with col2:
+
     st.markdown("""
     <div class='metric-card'>
         <div class='metric-title'>Models</div>
@@ -500,19 +502,20 @@ with c2:
     </div>
     """, unsafe_allow_html=True)
 
-with c3:
-    st.markdown("""
+with col3:
+
+    st.markdown(f"""
     <div class='metric-card'>
         <div class='metric-title'>Scenario</div>
-        <div class='metric-value'>""" + variant + """</div>
+        <div class='metric-value'>{variant}</div>
     </div>
     """, unsafe_allow_html=True)
 
+# =====================================================
+# UPLOAD SECTION
+# =====================================================
 st.write("")
 
-# =====================================================
-UPLOAD
-# =====================================================
 st.markdown("""
 <div class='glass-card'>
 <h3>📤 Upload Gambar Daun Tomat</h3>
@@ -528,7 +531,7 @@ uploaded_file = st.file_uploader(
 )
 
 # =====================================================
-INFERENCE
+# INFERENCE
 # =====================================================
 if uploaded_file is not None:
 
@@ -537,7 +540,7 @@ if uploaded_file is not None:
     col1, col2 = st.columns([1,1])
 
     # =================================================
-    # IMAGE
+    # IMAGE PREVIEW
     # =================================================
     with col1:
 
@@ -574,7 +577,7 @@ if uploaded_file is not None:
         )
 
     # =================================================
-    # PREDICT
+    # PREDICTION
     # =================================================
     pred_mn = model_mn.predict(
         x_mn,
@@ -605,9 +608,6 @@ if uploaded_file is not None:
         </div>
         """, unsafe_allow_html=True)
 
-        # =============================================
-        # CONFIDENCE GATE
-        # =============================================
         if conf_mn < threshold or conf_ef < threshold:
 
             st.error(
@@ -620,9 +620,9 @@ if uploaded_file is not None:
 
         else:
 
-            # =========================================
+            # =============================================
             # MOBILE NET
-            # =========================================
+            # =============================================
             st.markdown(f"""
             <div class='pred-card'>
 
@@ -641,9 +641,9 @@ if uploaded_file is not None:
                 f"Confidence: {conf_mn*100:.2f}%"
             )
 
-            # =========================================
+            # =============================================
             # EFFICIENT NET
-            # =========================================
+            # =============================================
             st.markdown(f"""
             <div class='pred-card'>
 
