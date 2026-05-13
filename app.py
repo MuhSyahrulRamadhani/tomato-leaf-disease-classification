@@ -676,28 +676,57 @@ if uploaded_file is not None:
             st.progress(conf_ef)
 
     # =================================================
-    # CHART
+    # CHART MOBILENET
     # =================================================
     st.write("")
 
     st.markdown("""
     <div class='glass-card'>
-    <h3>📈 Probability Distribution</h3>
+    <h3 style='text-align:center;'>
+    📈 Probability Distribution
+    <br>
+    MobileNetV2
+    </h3>
     </div>
     """, unsafe_allow_html=True)
 
-    chart_data = pd.DataFrame({
+    chart_mn = pd.DataFrame({
 
         "Class": CLASS_NAMES,
 
-        "MobileNetV2": pred_mn,
-
-        "EfficientNetB0": pred_ef
+        "Probability": pred_mn
     })
 
     st.bar_chart(
-        chart_data.set_index("Class"),
-        height=350
+        chart_mn.set_index("Class"),
+        height=260
+    )
+
+    # =================================================
+    # CHART EFFICIENTNET
+    # =================================================
+    st.write("")
+
+    st.markdown("""
+    <div class='glass-card'>
+    <h3 style='text-align:center;'>
+    📈 Probability Distribution
+    <br>
+    EfficientNetB0
+    </h3>
+    </div>
+    """, unsafe_allow_html=True)
+
+    chart_ef = pd.DataFrame({
+
+        "Class": CLASS_NAMES,
+
+        "Probability": pred_ef
+    })
+
+    st.bar_chart(
+        chart_ef.set_index("Class"),
+        height=260
     )
 
 # =====================================================
