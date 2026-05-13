@@ -1,28 +1,29 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 import streamlit as st
 import tensorflow as tf
 import numpy as np
 from PIL import Image
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input as mobilenet_preprocess
-from tensorflow.keras.applications.efficientnet import preprocess_input as efficientnet_preprocess
+import os
+import gdown
 
-# =============================
+from tensorflow.keras.applications.mobilenet_v2 import (
+    preprocess_input as mobilenet_preprocess
+)
+
+from tensorflow.keras.applications.efficientnet import (
+    preprocess_input as efficientnet_preprocess
+)
+
+# ============================================
 # CONFIG
-# =============================
+# ============================================
 st.set_page_config(
     page_title="Klasifikasi Penyakit Daun Tomat",
     layout="centered"
 )
 
-# =============================
+# ============================================
 # CLASS NAMES
-# SESUAI DATASET SKRIPSI
-# =============================
+# ============================================
 CLASS_NAMES = [
     'Bacterial Spot',
     'Early Blight',
@@ -36,9 +37,9 @@ CLASS_NAMES = [
     'Healthy'
 ]
 
-# =============================
+# ============================================
 # CONFIDENCE THRESHOLD
-# =============================
+# ============================================
 CONF_THRESHOLDS = {
     "FF": 0.50,
     "FT10": 0.53,
@@ -46,67 +47,107 @@ CONF_THRESHOLDS = {
     "FT30": 0.50
 }
 
-# =============================
-# LOAD MODEL
-# =============================
-@st.cache_resource
-def load_models():
-    models = {
-        "FF": {
-            "MobileNetV2": tf.keras.models.load_model(
-                "mobilenetv2_ff.keras",
-                compile=False
-            ),
-            "EfficientNetB0": tf.keras.models.load_model(
-                "efficientnetb0_ff.keras",
-                compile=False
-            )
+# ============================================
+# GOOGLE DRIVE MODEL CONFIG
+# GANTI FILE_ID SESUAI MODEL ANDA
+# ============================================
+MODEL_URLS = {
+
+    "FF": {
+
+        "MobileNetV2": {
+            "file_id": "1K2Cviwt7P5-HLjwpgoX3QhKsSHP-n3RC",
+            "path": "mobilenetv2_ff.keras"
         },
 
-        "FT10": {
-            "MobileNetV2": tf.keras.models.load_model(
-                "mobilenetv2_ft10.keras",
-                compile=False
-            ),
-            "EfficientNetB0": tf.keras.models.load_model(
-                "efficientnetb0_ft10.keras",
-                compile=False
-            )
+        "EfficientNetB0": {
+            "file_id": "1h09odXiKLJogczI_bTYxzNWIvLXKBR4w",
+            "path": "efficientnetb0_ff.keras"
+        }
+    },
+
+    "FT10": {
+
+        "MobileNetV2": {
+            "file_id": "1dtZ7pVeOlXzS-xeu_H_SUBXOdg6gjogX",
+            "path": "mobilenetv2_ft10.keras"
         },
 
-        "FT20": {
-            "MobileNetV2": tf.keras.models.load_model(
-                "mobilenetv2_ft20.keras",
-                compile=False
-            ),
-            "EfficientNetB0": tf.keras.models.load_model(
-                "efficientnetb0_ft20.keras",
-                compile=False
-            )
+        "EfficientNetB0": {
+            "file_id": "1gVyb03l2FcAwV2AP5NtAG-TFfvcETwiD",
+            "path": "efficientnetb0_ft10.keras"
+        }
+    },
+
+    "FT20": {
+
+        "MobileNetV2": {
+            "file_id": "1-chX-5cUA7KlcvDKtYRzfRi6D37qW_XE",
+            "path": "mobilenetv2_ft20.keras"
         },
 
-        "FT30": {
-            "MobileNetV2": tf.keras.models.load_model(
-                "mobilenetv2_ft30.keras",
-                compile=False
-            ),
-            "EfficientNetB0": tf.keras.models.load_model(
-                "efficientnetb0_ft30.keras",
-                compile=False
-            )
+        "EfficientNetB0": {
+            "file_id": "1HS9ZRwFlPVXyGNUOjddYWwabtNfNkOH0",
+            "path": "efficientnetb0_ft20.keras"
+        }
+    },
+
+    "FT30": {
+
+        "MobileNetV2": {
+            "file_id": "1kcSYiL0BhoqHFSn9kONmowetPwWVePW5",
+            "path": "mobilenetv2_ft30.keras"
+        },
+
+        "EfficientNetB0": {
+            "file_id": "19COA5SOO3eA9ox50mhgT1M_ho-cwiQ7y",
+            "path": "efficientnetb0_ft30.keras"
         }
     }
+}
 
-    return models
+# ============================================
+# DOWNLOAD MODEL
+# ============================================
+def download_model(file_id, output_path):
 
+    if not os.path.exists(output_path):
 
-MODELS = load_models()
+        url = f"https://drive.google.com/uc?id={file_id}"
 
-# =============================
+        with st.spinner(f"Downloading {output_path} ..."):
+
+            gdown.download(
+                url,
+                output_path,
+                quiet=False
+            )
+
+# ============================================
+# LOAD SINGLE MODEL
+# ============================================
+@st.cache_resource
+def load_single_model(model_name, variant):
+
+    info = MODEL_URLS[variant][model_name]
+
+    download_model(
+        info["file_id"],
+        info["path"]
+    )
+
+    model = tf.keras.models.load_model(
+        info["path"],
+        compile=False
+    )
+
+    return model
+
+# ============================================
 # PREPROCESSING
-# SESUAI SKRIPSI
-# =============================
+# ============================================
 def preprocess_mobilenet(img: Image.Image):
+
     img = img.convert("RGB")
     img = img.resize((224, 224))
 
@@ -119,6 +160,7 @@ def preprocess_mobilenet(img: Image.Image):
 
 
 def preprocess_efficientnet(img: Image.Image):
+
     img = img.convert("RGB")
     img = img.resize((224, 224))
 
@@ -129,10 +171,9 @@ def preprocess_efficientnet(img: Image.Image):
 
     return img
 
-
-# =============================
+# ============================================
 # UI
-# =============================
+# ============================================
 st.title("Klasifikasi Penyakit Daun Tomat")
 
 st.write(
@@ -145,57 +186,53 @@ st.write(
 
 st.markdown("---")
 
-# =============================
+# ============================================
 # INFORMASI PENYAKIT
-# =============================
+# ============================================
 st.subheader("Informasi Kelas Penyakit")
 
 with st.expander("🟤 Bacterial Spot"):
     st.write(
-        "Penyakit bercak bakteri yang menyebabkan munculnya "
-        "bercak kecil berwarna coklat gelap pada daun."
+        "Penyakit bercak bakteri yang menyebabkan "
+        "bercak kecil coklat gelap pada daun."
     )
 
 with st.expander("🟠 Early Blight"):
     st.write(
-        "Ditandai bercak melingkar seperti cincin target "
-        "dengan warna coklat pada daun."
+        "Ditandai bercak melingkar seperti cincin "
+        "target pada daun."
     )
 
 with st.expander("⚫ Late Blight"):
     st.write(
-        "Penyakit dengan bercak gelap basah yang cepat menyebar "
-        "pada permukaan daun."
+        "Penyakit dengan bercak gelap basah "
+        "yang cepat menyebar."
     )
 
 with st.expander("🟢 Leaf Mold"):
     st.write(
-        "Menyebabkan bercak kekuningan pada permukaan atas daun "
-        "dan jamur pada bagian bawah daun."
+        "Menyebabkan bercak kekuningan "
+        "dan pertumbuhan jamur."
     )
 
 with st.expander("🟡 Septoria Leaf Spot"):
     st.write(
-        "Ditandai bercak kecil abu-abu dengan tepi gelap "
-        "yang menyebar pada daun."
+        "Bercak kecil abu-abu dengan tepi gelap."
     )
 
 with st.expander("🕷 Spider Mites"):
     st.write(
-        "Serangan tungau yang menyebabkan bercak kuning "
-        "dan kerusakan jaringan daun."
+        "Serangan tungau yang merusak jaringan daun."
     )
 
 with st.expander("🎯 Target Spot"):
     st.write(
-        "Memiliki bercak melingkar menyerupai target "
-        "dengan pola konsentris."
+        "Bercak melingkar menyerupai target."
     )
 
 with st.expander("🦠 Tomato Mosaic Virus"):
     st.write(
-        "Virus yang menyebabkan pola mosaik "
-        "dan perubahan bentuk daun."
+        "Virus yang menyebabkan pola mosaik."
     )
 
 with st.expander("🌿 Tomato Yellow Leaf Curl Virus"):
@@ -209,25 +246,25 @@ with st.expander("✅ Healthy"):
         "Daun tomat sehat tanpa gejala penyakit."
     )
 
-# =============================
+# ============================================
 # MODEL SELECTOR
-# =============================
+# ============================================
 variant = st.selectbox(
     "Pilih skenario model",
     ["FF", "FT10", "FT20", "FT30"]
 )
 
-# =============================
+# ============================================
 # FILE UPLOADER
-# =============================
+# ============================================
 uploaded_file = st.file_uploader(
     "Upload gambar daun tomat",
     type=["jpg", "jpeg", "png"]
 )
 
-# =============================
+# ============================================
 # INFERENCE
-# =============================
+# ============================================
 if uploaded_file is not None:
 
     image = Image.open(uploaded_file)
@@ -237,29 +274,46 @@ if uploaded_file is not None:
     col_l, col_c, col_r = st.columns([1, 2, 1])
 
     with col_c:
-        st.image(image, use_container_width=True)
+        st.image(
+            image,
+            use_container_width=True
+        )
 
-    # =============================
+    # ============================================
     # PREPROCESS
-    # =============================
+    # ============================================
     x_mn = preprocess_mobilenet(image)
     x_ef = preprocess_efficientnet(image)
 
-    # =============================
+    # ============================================
     # LOAD MODEL
-    # =============================
-    model_mn = MODELS[variant]["MobileNetV2"]
-    model_ef = MODELS[variant]["EfficientNetB0"]
+    # ============================================
+    model_mn = load_single_model(
+        "MobileNetV2",
+        variant
+    )
 
-    # =============================
-    # PREDICT
-    # =============================
-    pred_mn = model_mn.predict(x_mn, verbose=0)[0]
-    pred_ef = model_ef.predict(x_ef, verbose=0)[0]
+    model_ef = load_single_model(
+        "EfficientNetB0",
+        variant
+    )
 
-    # =============================
+    # ============================================
+    # PREDICTION
+    # ============================================
+    pred_mn = model_mn.predict(
+        x_mn,
+        verbose=0
+    )[0]
+
+    pred_ef = model_ef.predict(
+        x_ef,
+        verbose=0
+    )[0]
+
+    # ============================================
     # CONFIDENCE
-    # =============================
+    # ============================================
     conf_mn = float(np.max(pred_mn))
     conf_ef = float(np.max(pred_ef))
 
@@ -268,9 +322,9 @@ if uploaded_file is not None:
 
     threshold = CONF_THRESHOLDS[variant]
 
-    # =============================
+    # ============================================
     # CONFIDENCE GATE
-    # =============================
+    # ============================================
     if conf_mn < threshold or conf_ef < threshold:
 
         st.markdown("---")
@@ -293,13 +347,15 @@ if uploaded_file is not None:
 
         st.markdown("---")
 
-        st.subheader(f"Hasil Prediksi ({variant})")
+        st.subheader(
+            f"Hasil Prediksi ({variant})"
+        )
 
         col1, col2 = st.columns(2)
 
-        # =============================
+        # ============================================
         # MOBILENETV2
-        # =============================
+        # ============================================
         with col1:
 
             st.markdown("### MobileNetV2")
@@ -321,9 +377,9 @@ if uploaded_file is not None:
                 }
             )
 
-        # =============================
+        # ============================================
         # EFFICIENTNETB0
-        # =============================
+        # ============================================
         with col2:
 
             st.markdown("### EfficientNetB0")
@@ -345,16 +401,17 @@ if uploaded_file is not None:
                 }
             )
 
-# =============================
+# ============================================
 # FOOTER
-# =============================
+# ============================================
 st.markdown("---")
 
 st.caption(
     """
     Skripsi:
-    Perbandingan Efektivitas dan Efisiensi Model Transfer Learning 
-    MobileNetV2 dan EfficientNetB0 pada Klasifikasi Penyakit Daun Tomat
+    Perbandingan Efektivitas dan Efisiensi 
+    Model Transfer Learning MobileNetV2 
+    dan EfficientNetB0 pada Klasifikasi 
+    Penyakit Daun Tomat
     """
 )
-
