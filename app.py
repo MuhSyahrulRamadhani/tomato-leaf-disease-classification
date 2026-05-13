@@ -40,7 +40,7 @@ st.markdown("""
     color: white;
 }
 
-/* MOBILE RESPONSIVE */
+/* RESPONSIVE CONTAINER */
 .block-container {
     padding-top: 1rem;
     padding-bottom: 1rem;
@@ -53,8 +53,27 @@ st.markdown("""
     border-right: 1px solid rgba(255,255,255,0.08);
 }
 
+/* SIDEBAR TEXT */
 [data-testid="stSidebar"] * {
     color: white !important;
+}
+
+/* SELECTBOX LABEL */
+.stSelectbox label {
+    color: white !important;
+    font-weight: bold;
+}
+
+/* SELECTBOX INPUT */
+.stSelectbox div[data-baseweb="select"] > div {
+    color: black !important;
+    background-color: white !important;
+    border-radius: 10px;
+}
+
+/* DROPDOWN MENU */
+div[data-baseweb="popover"] * {
+    color: black !important;
 }
 
 /* CARD */
@@ -77,7 +96,7 @@ st.markdown("""
     margin-bottom: 15px;
 }
 
-/* TITLE */
+/* RESULT TITLE */
 .result-title {
     font-size: 22px;
     font-weight: bold;
@@ -97,12 +116,12 @@ st.markdown("""
     font-size: 14px;
 }
 
-/* RESPONSIVE IMAGE */
+/* IMAGE */
 img {
     border-radius: 18px;
 }
 
-/* MOBILE VIEW */
+/* MOBILE RESPONSIVE */
 @media (max-width: 768px) {
 
     .result-title {
@@ -155,7 +174,7 @@ CLASS_NAMES = [
 ]
 
 # ============================================
-# DISEASE INFO
+# DISEASE INFORMATION
 # ============================================
 DISEASE_INFO = {
 
@@ -374,7 +393,7 @@ def load_single_model(model_name, variant):
     return model
 
 # ============================================
-# PREPROCESS
+# PREPROCESSING
 # ============================================
 def preprocess_mobilenet(img):
 
@@ -415,12 +434,11 @@ menggunakan MobileNetV2 dan EfficientNetB0.
 """, unsafe_allow_html=True)
 
 # ============================================
-# INFO CARD
+# INFO CARDS
 # ============================================
-colA, colB, colC = st.columns(3)
+col1, col2, col3 = st.columns(3)
 
-with colA:
-
+with col1:
     st.markdown("""
     <div class="custom-card">
     <h3>📊 Dataset</h3>
@@ -428,8 +446,7 @@ with colA:
     </div>
     """, unsafe_allow_html=True)
 
-with colB:
-
+with col2:
     st.markdown(f"""
     <div class="custom-card">
     <h3>🧠 Model</h3>
@@ -437,8 +454,7 @@ with colB:
     </div>
     """, unsafe_allow_html=True)
 
-with colC:
-
+with col3:
     st.markdown("""
     <div class="custom-card">
     <h3>⚡ Transfer Learning</h3>
@@ -447,7 +463,7 @@ with colC:
     """, unsafe_allow_html=True)
 
 # ============================================
-# FILE UPLOADER
+# UPLOADER
 # ============================================
 st.markdown("""
 <div class="custom-card">
@@ -535,9 +551,9 @@ if uploaded_file is not None:
             </div>
             """, unsafe_allow_html=True)
 
-            col1, col2 = st.columns(2)
+            colA, colB = st.columns(2)
 
-            with col1:
+            with colA:
 
                 st.markdown(f"""
                 <div class="pred-card">
@@ -560,7 +576,7 @@ if uploaded_file is not None:
                     for i in range(len(CLASS_NAMES))
                 })
 
-            with col2:
+            with colB:
 
                 st.markdown(f"""
                 <div class="pred-card">
