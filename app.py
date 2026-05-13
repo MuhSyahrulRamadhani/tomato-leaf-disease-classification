@@ -21,104 +21,166 @@ st.set_page_config(
     layout="centered"
 )
 # ============================================
-# DARK MODE CSS
+# MODERN DARK UI
 # ============================================
 st.markdown("""
 <style>
 
-/* BACKGROUND */
+/* IMPORT FONT */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;600;700&display=swap');
+
+/* MAIN APP */
 .stApp {
-    background: linear-gradient(
-        135deg,
-        #050505,
-        #0b1d1a,
-        #102b25
-    );
+
+    background: #050816;
     color: white;
+    font-family: 'Inter', sans-serif;
 }
 
-/* MAIN CONTAINER */
+/* CONTAINER */
 .block-container {
+
+    max-width: 900px;
     padding-top: 2rem;
     padding-bottom: 2rem;
 }
 
 /* TEXT */
-h1, h2, h3, h4, h5, h6, p, label, div {
+h1,h2,h3,h4,h5,h6 {
+
     color: white !important;
+    font-family: 'Poppins', sans-serif;
+}
+
+p,label,div,span {
+
+    color: #d6d6d6 !important;
+}
+
+/* TITLE */
+h1 {
+
+    font-size: 42px !important;
+    font-weight: 700 !important;
+    margin-bottom: 10px;
+}
+
+/* SUBTITLE */
+.subtitle {
+
+    color: #9ca3af;
+    font-size: 16px;
+    margin-bottom: 30px;
+}
+
+/* LINE */
+hr {
+
+    border: 1px solid rgba(255,255,255,0.08);
 }
 
 /* SIDEBAR */
 [data-testid="stSidebar"] {
-    background-color: #050505;
-    border-right: 1px solid rgba(255,255,255,0.08);
+
+    background-color: #030712;
+    border-right: 1px solid rgba(255,255,255,0.05);
 }
 
 /* SIDEBAR TEXT */
 [data-testid="stSidebar"] * {
+
     color: white !important;
 }
 
 /* SELECTBOX */
 .stSelectbox label {
+
     color: white !important;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 /* SELECTBOX FIELD */
 .stSelectbox div[data-baseweb="select"] > div {
-    background-color: white !important;
-    color: black !important;
+
+    background-color: #111827 !important;
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 10px;
+    color: white !important;
 }
 
 /* SELECTBOX TEXT */
 .stSelectbox div[data-baseweb="select"] span {
-    color: black !important;
+
+    color: white !important;
 }
 
-/* DROPDOWN MENU */
+/* DROPDOWN */
 div[data-baseweb="popover"] * {
-    color: black !important;
-}
 
-/* FILE UPLOADER */
-[data-testid="stFileUploader"] {
-    background-color: rgba(255,255,255,0.05);
-    border-radius: 15px;
-    padding: 15px;
+    color: white !important;
+    background-color: #111827 !important;
 }
 
 /* EXPANDER */
 .streamlit-expanderHeader {
-    background-color: rgba(255,255,255,0.05);
+
+    background-color: rgba(255,255,255,0.03);
     border-radius: 10px;
+    padding: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
 }
 
-/* CHART */
-canvas {
+/* EXPANDER CONTENT */
+.streamlit-expanderContent {
+
     background-color: rgba(255,255,255,0.02);
+    border-radius: 0 0 10px 10px;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+/* FILE UPLOADER */
+[data-testid="stFileUploader"] {
+
+    background-color: rgba(255,255,255,0.04);
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.05);
+    padding: 10px;
+}
+
+/* BUTTON */
+.stButton button {
+
+    background-color: #111827;
+    color: white;
     border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
 }
 
 /* IMAGE */
 img {
-    border-radius: 18px;
+
+    border-radius: 16px;
 }
 
-/* MOBILE RESPONSIVE */
+/* CHART */
+canvas {
+
+    background-color: rgba(255,255,255,0.01);
+    border-radius: 12px;
+}
+
+/* MOBILE */
 @media (max-width: 768px) {
 
     h1 {
-        font-size: 28px !important;
+
+        font-size: 30px !important;
     }
 
-    h2 {
-        font-size: 22px !important;
-    }
+    .block-container {
 
-    h3 {
-        font-size: 18px !important;
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 
 }
