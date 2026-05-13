@@ -56,6 +56,28 @@ st.markdown("""
 [data-testid="stSidebar"] * {
     color: white !important;
 }
+/* SELECTBOX LABEL */
+.stSelectbox label {
+    color: white !important;
+    font-weight: bold;
+}
+
+/* SELECTBOX FIELD */
+.stSelectbox div[data-baseweb="select"] > div {
+    background-color: white !important;
+    color: black !important;
+    border-radius: 10px;
+}
+
+/* SELECTBOX TEXT */
+.stSelectbox div[data-baseweb="select"] span {
+    color: black !important;
+}
+
+/* DROPDOWN MENU */
+div[data-baseweb="popover"] * {
+    color: black !important;
+}
 
 /* CARD */
 .custom-card {
