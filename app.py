@@ -19,7 +19,8 @@ from tensorflow.keras.applications.efficientnet import (
 st.set_page_config(
     page_title="Tomato AI Detection",
     page_icon="🌿",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # ============================================
@@ -28,6 +29,7 @@ st.set_page_config(
 st.markdown("""
 <style>
 
+/* MAIN APP */
 .stApp {
     background: linear-gradient(
         135deg,
@@ -38,55 +40,99 @@ st.markdown("""
     color: white;
 }
 
+/* MOBILE RESPONSIVE */
 .block-container {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    max-width: 1200px;
 }
 
-h1,h2,h3,h4,h5,h6 {
+/* SIDEBAR */
+[data-testid="stSidebar"] {
+    background-color: #050505;
+    border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+[data-testid="stSidebar"] * {
     color: white !important;
 }
 
-p, label, div {
-    color: white;
-}
-
+/* CARD */
 .custom-card {
     background: rgba(255,255,255,0.06);
-    padding: 25px;
+    padding: 20px;
     border-radius: 20px;
     border: 1px solid rgba(255,255,255,0.08);
     backdrop-filter: blur(12px);
     margin-bottom: 20px;
 }
 
+/* PREDICTION CARD */
 .pred-card {
     background: rgba(255,255,255,0.08);
-    padding: 25px;
+    padding: 20px;
     border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.08);
     text-align: center;
+    margin-bottom: 15px;
 }
 
+/* TITLE */
 .result-title {
-    font-size: 26px;
+    font-size: 22px;
     font-weight: bold;
     color: #9effb0;
 }
 
+/* CONFIDENCE */
 .confidence {
-    font-size: 34px;
+    font-size: 30px;
     font-weight: bold;
     color: #ffe082;
 }
 
+/* SMALL TEXT */
 .small-text {
     color: #d7d7d7;
     font-size: 14px;
 }
 
-.sidebar .sidebar-content {
-    background-color: #081c19;
+/* RESPONSIVE IMAGE */
+img {
+    border-radius: 18px;
+}
+
+/* MOBILE VIEW */
+@media (max-width: 768px) {
+
+    .result-title {
+        font-size: 18px;
+    }
+
+    .confidence {
+        font-size: 24px;
+    }
+
+    .custom-card {
+        padding: 15px;
+    }
+
+    .pred-card {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 28px !important;
+    }
+
+    h2 {
+        font-size: 22px !important;
+    }
+
+    h3 {
+        font-size: 18px !important;
+    }
+
 }
 
 </style>
@@ -189,6 +235,32 @@ CONF_THRESHOLDS = {
 # ============================================
 MODEL_URLS = {
 
+    "FF": {
+
+        "MobileNetV2": {
+            "file_id": "1K2Cviwt7P5-HLjwpgoX3QhKsSHP-n3RC",
+            "path": "mobilenetv2_ff.keras"
+        },
+
+        "EfficientNetB0": {
+            "file_id": "1h09odXiKLJogczI_bTYxzNWIvLXKBR4w",
+            "path": "efficientnetb0_ff.keras"
+        }
+    },
+
+    "FT10": {
+
+        "MobileNetV2": {
+            "file_id": "1dtZ7pVeOlXzS-xeu_H_SUBXOdg6gjogX",
+            "path": "mobilenetv2_ft10.keras"
+        },
+
+        "EfficientNetB0": {
+            "file_id": "1gVyb03l2FcAwV2AP5NtAG-TFfvcETwiD",
+            "path": "efficientnetb0_ft10.keras"
+        }
+    },
+
     "FT20": {
 
         "MobileNetV2": {
@@ -200,6 +272,19 @@ MODEL_URLS = {
             "file_id": "1HS9ZRwFlPVXyGNUOjddYWwabtNfNkOH0",
             "path": "efficientnetb0_ft20.keras"
         }
+    },
+
+    "FT30": {
+
+        "MobileNetV2": {
+            "file_id": "1kcSYiL0BhoqHFSn9kONmowetPwWVePW5",
+            "path": "mobilenetv2_ft30.keras"
+        },
+
+        "EfficientNetB0": {
+            "file_id": "19COA5SOO3eA9ox50mhgT1M_ho-cwiQ7y",
+            "path": "efficientnetb0_ft30.keras"
+        }
     }
 }
 
@@ -208,19 +293,26 @@ MODEL_URLS = {
 # ============================================
 with st.sidebar:
 
-    st.markdown("## 🌱 Tomato AI")
+    st.markdown("# 🌿 Tomato AI")
+
+    st.markdown("---")
+
+    selected_variant = st.selectbox(
+        "Pilih Skenario Model",
+        ["FF", "FT10", "FT20", "FT30"]
+    )
 
     st.markdown("---")
 
     st.markdown("""
-    ### Tentang Sistem
+    ### 📌 Tentang Sistem
     
     Sistem AI berbasis Deep Learning untuk:
     
-    - Deteksi penyakit daun tomat
-    - Klasifikasi otomatis
+    - Klasifikasi penyakit daun tomat
     - Perbandingan model CNN
-    - Analisis transfer learning
+    - Evaluasi transfer learning
+    - Analisis hasil prediksi
     """)
 
     st.markdown("---")
@@ -231,13 +323,13 @@ with st.sidebar:
     - Gunakan gambar jelas
     - Fokus pada daun
     - Hindari blur
-    - Cahaya cukup
+    - Gunakan cahaya cukup
     """)
 
     st.markdown("---")
 
     st.markdown("""
-    ### 👨‍🎓 Penelitian
+    ### 👨‍🎓 Penelitian Skripsi
     
     Perbandingan Efektivitas dan Efisiensi 
     MobileNetV2 dan EfficientNetB0 
@@ -265,9 +357,9 @@ def download_model(file_id, output_path):
 # LOAD MODEL
 # ============================================
 @st.cache_resource
-def load_single_model(model_name):
+def load_single_model(model_name, variant):
 
-    info = MODEL_URLS["FT20"][model_name]
+    info = MODEL_URLS[variant][model_name]
 
     download_model(
         info["file_id"],
@@ -282,7 +374,7 @@ def load_single_model(model_name):
     return model
 
 # ============================================
-# PREPROCESSING
+# PREPROCESS
 # ============================================
 def preprocess_mobilenet(img):
 
@@ -293,7 +385,6 @@ def preprocess_mobilenet(img):
     img = np.expand_dims(img, axis=0)
 
     return mobilenet_preprocess(img)
-
 
 def preprocess_efficientnet(img):
 
@@ -324,7 +415,7 @@ menggunakan MobileNetV2 dan EfficientNetB0.
 """, unsafe_allow_html=True)
 
 # ============================================
-# MODEL INFO
+# INFO CARD
 # ============================================
 colA, colB, colC = st.columns(3)
 
@@ -339,10 +430,10 @@ with colA:
 
 with colB:
 
-    st.markdown("""
+    st.markdown(f"""
     <div class="custom-card">
     <h3>🧠 Model</h3>
-    <p>MobileNetV2 & EfficientNetB0.</p>
+    <p>Skenario: {selected_variant}</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -351,7 +442,7 @@ with colC:
     st.markdown("""
     <div class="custom-card">
     <h3>⚡ Transfer Learning</h3>
-    <p>Fine Tuning FT20.</p>
+    <p>MobileNetV2 & EfficientNetB0.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -401,11 +492,13 @@ if uploaded_file is not None:
         with st.spinner("Loading AI Models ..."):
 
             model_mn = load_single_model(
-                "MobileNetV2"
+                "MobileNetV2",
+                selected_variant
             )
 
             model_ef = load_single_model(
-                "EfficientNetB0"
+                "EfficientNetB0",
+                selected_variant
             )
 
         pred_mn = model_mn.predict(
@@ -424,7 +517,7 @@ if uploaded_file is not None:
         idx_mn = int(np.argmax(pred_mn))
         idx_ef = int(np.argmax(pred_ef))
 
-        threshold = CONF_THRESHOLDS["FT20"]
+        threshold = CONF_THRESHOLDS[selected_variant]
 
         if conf_mn < threshold or conf_ef < threshold:
 
@@ -459,10 +552,6 @@ if uploaded_file is not None:
                 {conf_mn*100:.2f}%
                 </p>
 
-                <p class="small-text">
-                Confidence Prediction
-                </p>
-
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -486,10 +575,6 @@ if uploaded_file is not None:
                 {conf_ef*100:.2f}%
                 </p>
 
-                <p class="small-text">
-                Confidence Prediction
-                </p>
-
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -499,15 +584,13 @@ if uploaded_file is not None:
                 })
 
             # ============================================
-            # SUMMARY
+            # COMPARISON
             # ============================================
             better_model = (
                 "EfficientNetB0"
                 if conf_ef > conf_mn
                 else "MobileNetV2"
             )
-
-            st.markdown("---")
 
             st.markdown(f"""
             <div class="custom-card">
