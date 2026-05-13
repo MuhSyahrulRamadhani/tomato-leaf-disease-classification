@@ -28,7 +28,7 @@ st.set_page_config(
 )
 
 # =====================================================
-# MODERN UI
+# MODERN PROFESSIONAL UI
 # =====================================================
 st.markdown("""
 <style>
@@ -43,26 +43,30 @@ html, body, [class*="css"] {
 BACKGROUND
 ===================================================== */
 .stApp {
+
     background:
     radial-gradient(circle at top left, #16325B 0%, transparent 25%),
     radial-gradient(circle at bottom right, #14532d 0%, transparent 25%),
     linear-gradient(135deg, #020617 0%, #07111f 50%, #020617 100%);
+
     color: white;
 }
 
 /* =====================================================
-CONTAINER
+MAIN CONTAINER
 ===================================================== */
 .block-container {
+    max-width: 1350px;
     padding-top: 1.5rem;
-    max-width: 1400px;
 }
 
 /* =====================================================
 SIDEBAR
 ===================================================== */
 [data-testid="stSidebar"] {
-    background: rgba(10,15,25,0.95);
+
+    background: rgba(10,15,25,0.96);
+
     border-right: 1px solid rgba(255,255,255,0.08);
 }
 
@@ -74,13 +78,18 @@ SIDEBAR
 TITLE
 ===================================================== */
 .main-title {
+
     font-size: 58px;
+
     font-weight: 800;
+
     line-height: 1.1;
+
     margin-bottom: 10px;
 }
 
 .gradient-text {
+
     background: linear-gradient(
         90deg,
         #4ade80,
@@ -88,12 +97,16 @@ TITLE
     );
 
     -webkit-background-clip: text;
+
     -webkit-text-fill-color: transparent;
 }
 
 .subtitle {
+
     color: #9ca3af;
+
     font-size: 18px;
+
     margin-top: 10px;
 }
 
@@ -114,7 +127,7 @@ GLASS CARD
 
     margin-bottom: 20px;
 
-    box-shadow: 0 0 25px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
 }
 
 /* =====================================================
@@ -124,7 +137,7 @@ METRIC CARD
 
     background: linear-gradient(
         135deg,
-        rgba(255,255,255,0.07),
+        rgba(255,255,255,0.06),
         rgba(255,255,255,0.03)
     );
 
@@ -135,22 +148,21 @@ METRIC CARD
     padding: 24px;
 
     text-align: center;
-
-    transition: 0.3s;
-}
-
-.metric-card:hover {
-    transform: translateY(-4px);
 }
 
 .metric-title {
+
     color: #9ca3af;
+
     font-size: 14px;
 }
 
 .metric-value {
+
     font-size: 28px;
+
     font-weight: 700;
+
     color: white;
 }
 
@@ -159,7 +171,7 @@ UPLOAD BOX
 ===================================================== */
 [data-testid="stFileUploader"] {
 
-    background: rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.04);
 
     border: 2px dashed rgba(255,255,255,0.15);
 
@@ -172,7 +184,9 @@ UPLOAD BOX
 SELECTBOX
 ===================================================== */
 .stSelectbox label {
+
     color: white !important;
+
     font-weight: 700;
 }
 
@@ -188,47 +202,50 @@ SELECTBOX
 }
 
 /* =====================================================
-BUTTON
-===================================================== */
-.stButton button {
-
-    width: 100%;
-
-    background: linear-gradient(
-        90deg,
-        #22c55e,
-        #06b6d4
-    );
-
-    color: white;
-
-    border: none;
-
-    border-radius: 16px;
-
-    padding: 14px;
-
-    font-weight: 700;
-}
-
-/* =====================================================
 PREDICTION CARD
 ===================================================== */
 .pred-card {
 
     background: linear-gradient(
         135deg,
-        rgba(34,197,94,0.15),
-        rgba(6,182,212,0.08)
+        rgba(255,255,255,0.06),
+        rgba(255,255,255,0.03)
     );
 
     border: 1px solid rgba(255,255,255,0.08);
 
-    border-radius: 24px;
+    border-radius: 22px;
 
-    padding: 24px;
+    padding: 22px;
 
     margin-bottom: 20px;
+}
+
+/* =====================================================
+PREVIEW IMAGE
+===================================================== */
+.preview-image {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    margin-top: 10px;
+}
+
+.preview-image img {
+
+    border-radius: 18px;
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+
+    max-width: 280px !important;
+
+    height: auto;
 }
 
 /* =====================================================
@@ -246,9 +263,13 @@ p,span,label,div {
 FOOTER
 ===================================================== */
 .footer {
+
     text-align:center;
+
     color:#6b7280;
+
     margin-top:50px;
+
     padding:20px;
 }
 
@@ -263,6 +284,10 @@ MOBILE
 
     .subtitle{
         font-size:15px;
+    }
+
+    .preview-image img{
+        max-width:220px !important;
     }
 
 }
@@ -480,7 +505,7 @@ Transfer Learning MobileNetV2 dan EfficientNetB0.
 """, unsafe_allow_html=True)
 
 # =====================================================
-# METRIC CARDS
+# METRIC CARD
 # =====================================================
 col1, col2, col3 = st.columns(3)
 
@@ -537,7 +562,7 @@ if uploaded_file is not None:
 
     image = Image.open(uploaded_file)
 
-    col1, col2 = st.columns([1,1])
+    col1, col2 = st.columns([0.9,1.1])
 
     # =================================================
     # IMAGE PREVIEW
@@ -550,9 +575,19 @@ if uploaded_file is not None:
         </div>
         """, unsafe_allow_html=True)
 
+        st.markdown(
+            "<div class='preview-image'>",
+            unsafe_allow_html=True
+        )
+
         st.image(
             image,
-            use_container_width=True
+            width=280
+        )
+
+        st.markdown(
+            "</div>",
+            unsafe_allow_html=True
         )
 
     # =================================================
